@@ -24,7 +24,11 @@ class Vehicle(BaseModel):
     year = models.PositiveBigIntegerField()
     vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE)
     fuel_type = models.CharField(max_length=20, choices=FUEL_TYPE, default='petrol')
-
+    image = models.ImageField(
+        upload_to = 'vehicles/',
+        null = True,
+        blank=True
+    )
 class Insurance(BaseModel):
     STATUS_CHOICES = [         #later use class-based enums instead of choice tuples
         ("active","Active"),

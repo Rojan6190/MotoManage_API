@@ -17,6 +17,7 @@ class VehicleSerializer(serializers.ModelSerializer):
             "year",
             "vehicle_type",
             "fuel_type",
+            "image", #added
     
         ]
         read_only_fields = ['id']
@@ -29,7 +30,6 @@ class InsuranceSerializer(serializers.ModelSerializer):
    
     owner_id = serializers.IntegerField(source='vehicle.owner.id', read_only=True)
     owner_username = serializers.CharField(source='vehicle.owner.username', read_only=True)
-    vehicle_details = serializers.CharField(source='__str__', read_only=True)
     
     class Meta:
         model = Insurance
@@ -38,11 +38,11 @@ class InsuranceSerializer(serializers.ModelSerializer):
             "vehicle",
             "owner_id",           #  New
             "owner_username",      # New
-            "vehicle_details",     # New
             "policy_number",
             "start_date",
             "expiry_date",
             "status",
+            
         ]
     
 

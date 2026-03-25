@@ -3,15 +3,19 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from .models import Vehicle, Insurance
 from .serializers import VehicleSerializer, InsuranceSerializer
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class VehicleList(generics.ListCreateAPIView):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
+    parser_classes = [MultiPartParser, FormParser]
     # permission_classes = [IsAuthenticated]  # Uncomment when you add authentication
 
 class VehicleDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
+    parser_classes = [MultiPartParser, FormParser]
     # permission_classes = [IsAuthenticated]  # Uncomment when you add authentication
 
 class UserVehicles(generics.ListAPIView):
