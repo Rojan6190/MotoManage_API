@@ -33,16 +33,34 @@ class UserSerializer(serializers.ModelSerializer):
         return value
     
     def validate_username(self, value):
-        if len(value) < 3:
-            raise serializers.ValidationError("Username too short!!")
-        return value
+     if len(value) < 3:
+        raise serializers.ValidationError("Username too short!!")
+     qs = User.objects.filter(username=value)
+     if self.instance:
+        qs = qs.exclude(pk=self.instance.pk)
+     if qs.exists():
+        raise serializers.ValidationError("This username is already taken.")
+     return value
     
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("user with this email already exists!")
-        return value
+     qs = User.objects.filter(email=value)
+     # If updating (instance exists), exclude the current user from the check
+     if self.instance:
+        qs = qs.exclude(pk=self.instance.pk)
+     if qs.exists():
+        raise serializers.ValidationError("User with this email already exists!")
+     return value
     
     def validate_phone_number(self, value):
         if len(value)<10:
             raise serializers.ValidationError("Phone no must be at least 10 digits.")
         return value
+    def validate_phone_number(self, value):
+     if len(value) < 10:
+        raise serializers.ValidationError("Phone no must be at least 10 digits.")
+     qs = User.objects.filter(phone_number=value)
+     if self.instance:
+        qs = qs.exclude(pk=self.instance.pk)
+     if qs.exists():
+        raise serializers.ValidationError("This phone number is already in use.")
+     return value

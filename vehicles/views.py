@@ -52,3 +52,5 @@ class VehicleInsuranceDetail(generics.RetrieveAPIView):
                 {"detail": "No insurance found for this vehicle"},
                 status=404
             )
+
+
