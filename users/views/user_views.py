@@ -1,53 +1,67 @@
-# users/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import User
-from .users_serializers import UserSerializer
 from django.shortcuts import get_object_or_404
 
+from ..models import User
+from ..serializers import UserSerializer
+
+
 class UserList(APIView):
-   
-    
+
     def get(self, request):
-        """Get all users"""
+        """GET /api/users/  →  list all users"""
         users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-    
+        return Response(UserSerializer(users, many=True).data)
+
     def post(self, request):
-        """Create a new user"""
+        """POST /api/users/  →  create user from dashboard (admin use)"""
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 class UserDetail(APIView):
-    #get, update or delete a single user
 
     def get(self, request, pk):
-        user=get_object_or_404(User,pk=pk)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
-    
+        """GET /api/users/<pk>"""
+        user = get_object_or_404(User, pk=pk)
+        return Response(UserSerializer(user).data)
+
     def put(self, request, pk):
+        """PUT /api/users/<pk>  →  full update"""
         user = get_object_or_404(User, pk=pk)
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def patch(self, request, pk):
+        """PATCH /api/users/<pk>  →  partial update"""
         user = get_object_or_404(User, pk=pk)
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def delete(self, request, pk):
+        """DELETE /api/users/<pk>"""
         user = get_object_or_404(User, pk=pk)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+    #Or we could have used generics with fewer code that does the same thing:
+ # from rest_framework import generics
+
+# class UserList(generics.ListCreateAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+
+# class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer

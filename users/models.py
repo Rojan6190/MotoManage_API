@@ -17,3 +17,12 @@ class User(AbstractUser, BaseModel):
     
     gender = models.CharField(max_length=20, choices=GENDER_CHOICE, default="male")
 
+    ROLE_CHOICES = [
+        ("admin", "Admin"),
+        ("user",  "User"),
+    ]
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="user")
+ 
+    def __str__(self):
+        return self.username
+ 
