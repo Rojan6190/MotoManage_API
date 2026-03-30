@@ -41,9 +41,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework.authtoken", 
+    "core",
     "users",
     "vehicles",
     "rest_framework",
+    "drf_spectacular",
+    
 ]
 AUTH_USER_MODEL = 'users.User'
 MIDDLEWARE = [
@@ -144,15 +147,37 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = '/media/'    
 MEDIA_ROOT = BASE_DIR / 'media'
 
-#DRF
+
+# ── REST FRAMEWORK ────────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
+
+    # --- Authentication ---
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    # Keep AllowAny for now — add permissions per-view or globally later
+
+    # --- Permissions (tight default; relax per-view where needed) ---
+    # IsAuthenticated means every endpoint requires a valid JWT unless a
+    # view explicitly overrides permission_classes (e.g. RegisterView / LoginView).
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ),
+
+    # --- Throttling ---
+    # Scope names defined here; rates attached below in DEFAULT_THROTTLE_RATES.
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',   # unauthenticated callers
+        'rest_framework.throttling.UserRateThrottle',   # authenticated callers
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon':   '30/minute',    # login / register endpoints hit by strangers
+        'user':   '200/minute',   # normal authenticated usage (mobile + dashboard)
+        # Custom named scopes — used by ScopedRateThrottle on specific views
+        'auth':   '10/minute',    # login & register (brute-force protection)
+        'admin':  '300/minute',   # admin dashboard can be chattier
+    
+    },
+    'DEFAULT_SCHEMA_CLASS':'drf_spectacular.openapi.AutoSchema',
 }
 
 #SimpleJWT
@@ -164,4 +189,11 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'MotoManage API',
+    'DESCRIPTION': 'Admin dashboard and mobile app API for MotoManage.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,  # hides the raw /api/schema/ from Swagger UI
 }

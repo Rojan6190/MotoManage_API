@@ -22,8 +22,8 @@ class VehicleSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id']
 
-def Validate_owner(self, value):
-    pass
+    def Validate_owner(self, value):
+        pass
 
 
 class InsuranceSerializer(serializers.ModelSerializer):
