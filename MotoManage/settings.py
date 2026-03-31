@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework.authtoken", 
+    "django_filters",
     "core",
     "users",
     "vehicles",
@@ -178,6 +179,9 @@ REST_FRAMEWORK = {
     
     },
     'DEFAULT_SCHEMA_CLASS':'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS':[
+        'rest_framework.filters.SearchFilter',
+    ]
 }
 
 #SimpleJWT
