@@ -181,7 +181,9 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS':'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS':[
         'rest_framework.filters.SearchFilter',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.StandardPagination',
+    'PAGE_SIZE':10,
 }
 
 #SimpleJWT
