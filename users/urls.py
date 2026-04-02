@@ -13,8 +13,12 @@ urlpatterns = [
 
     # ── Admin: user management (React dashboard) ──────────────────────────
     path('users/',          views.UserList.as_view(),   name='user-list'),
-    path('users/<int:pk>',  views.UserDetail.as_view(), name='user-detail'),
+    path('users/<int:pk>/',  views.UserDetail.as_view(), name='user-detail'),
 
     # ── Mobile: self-profile ───────────────────────────────────────────────
     path('mobile/profile/', views.MyProfile.as_view(),  name='my-profile'),
+
+    # user deactivate and restore
+    path('users/deactivated/', views.DeactivatedUserList.as_view(), name='deactivated-users'),
+    path('users/<int:pk>/restore/', views.RestoreUser.as_view(), name='restore-user'),
 ]

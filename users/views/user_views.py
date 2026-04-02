@@ -24,13 +24,13 @@ class UserList(generics.ListCreateAPIView):
     GET  /api/users/?search=jo  → search by username, name, email, phone
     POST /api/users/            → create a user from the dashboard
     """
-    queryset           = User.objects.all().order_by('-date_joined')
+    queryset           = User.objects.filter(is_active=True).order_by('-date_joined')
     serializer_class   = UserSerializer
     permission_classes = [IsAdmin]
     throttle_classes   = [ScopedRateThrottle]
     throttle_scope     = 'admin'
     filter_backends    = [SearchFilter]
-    search_fields      = ['username', 'first_name', 'last_name', 'email', 'phone_number']
+    search_fields      = ['username', 'first_name', 'last_name', 'email', 'mobile_number']
 
 
 class UserDetail(APIView):
@@ -67,7 +67,8 @@ class UserDetail(APIView):
 
     def delete(self, request, pk):
         user = get_object_or_404(User, pk=pk)
-        user.delete()
+        user.is_active = False
+        user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -90,3 +91,24 @@ class MyProfile(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class DeactivatedUserList(generics.ListAPIView):
+    # GET /api/users/deactivated/ -> list all soft-deleted users(admin only)    
+    queryset = User.objects.filter(is_active=False).order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [IsAdmin]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'admin'
+
+
+class RestoreUser(APIView):
+    #POST /api/users/<pk>/restore/ -> reactivate a soft-deleted user
+    permission_classes = [IsAdmin]
+    throttle_classes   = [ScopedRateThrottle]
+    throttle_scope     = 'admin'
+
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk, is_active=False)
+        user.is_active = True
+        user.save()
+        return Response(UserSerializer(user).data)
