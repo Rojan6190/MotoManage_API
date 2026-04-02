@@ -7,9 +7,10 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser, BaseModel):
     username     = models.CharField(max_length=15, unique=True)
-    phone_number = models.CharField(max_length=20, unique=True)
+    phone_number  = models.CharField(max_length=20, unique=False, null=True, blank=True)  # shared landline — not unique
     age          = models.PositiveBigIntegerField(null=True)
-    mobile_number = models.CharField(max_length=20, unique=False, default="+977-9800000000")
+    mobile_number = models.CharField(max_length=20, unique=True, default="+977-9800000000")  # personal — must be unique
+
     address      = models.CharField(max_length=100, null=True)
 
     GENDER_CHOICE = [

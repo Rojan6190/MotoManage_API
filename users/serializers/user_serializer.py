@@ -54,22 +54,28 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     def validate_phone_number(self, value):
+        # Optional — only validate if provided
+        if not value:
+            return value
         if not re.match(r'^[\d\+\-\s\(\)]+$', value):
             raise serializers.ValidationError("Phone number contains invalid characters.")
         digits = sum(c.isdigit() for c in value)
         if digits < 7:
             raise serializers.ValidationError("Phone number must contain at least 7 digits.")
-        qs = User.objects.filter(phone_number=value)
-        if self.instance:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise serializers.ValidationError("This phone number is already in use.")
-        return value
+        return value  # no uniqueness check — landline can be shared
 
     def validate_mobile_number(self, value):
+        # Required and must be unique
+        if not value or not value.strip():
+            raise serializers.ValidationError("Mobile number is required.")
         if not re.match(r'^[\d\+\-\s\(\)]+$', value):
             raise serializers.ValidationError("Mobile number contains invalid characters.")
         digits = sum(c.isdigit() for c in value)
         if digits < 10:
             raise serializers.ValidationError("Mobile number must contain at least 10 digits.")
+        qs = User.objects.filter(mobile_number=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("This mobile number is already in use.")
         return value
