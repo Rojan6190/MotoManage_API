@@ -45,8 +45,6 @@ class UserVehiclesAdmin(generics.ListAPIView):
     """
     Admin only.
     GET /api/users/<user_id>/vehicles/
-    Lists all vehicles belonging to a specific user.
-    Used by the React dashboard's UserVehicles page.
     """
     serializer_class   = VehicleSerializer
     permission_classes = [IsAdmin]
@@ -61,11 +59,12 @@ class InsuranceList(generics.ListCreateAPIView):
     """
     Admin only.
     GET  /api/insurances/   → list all insurance policies
-    POST /api/insurances/   → create a policy
+    POST /api/insurances/   → create a policy (supports document upload)
     """
     queryset           = Insurance.objects.select_related('vehicle__owner').all()
     serializer_class   = InsuranceSerializer
     permission_classes = [IsAdmin]
+    parser_classes     = [MultiPartParser, FormParser]
     throttle_classes   = [ScopedRateThrottle]
     throttle_scope     = 'admin'
 
@@ -78,6 +77,7 @@ class InsuranceDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset           = Insurance.objects.select_related('vehicle__owner').all()
     serializer_class   = InsuranceSerializer
     permission_classes = [IsAdmin]
+    parser_classes     = [MultiPartParser, FormParser]
     throttle_classes   = [ScopedRateThrottle]
     throttle_scope     = 'admin'
 
@@ -85,7 +85,7 @@ class InsuranceDetail(generics.RetrieveUpdateDestroyAPIView):
 class VehicleInsuranceDetail(generics.RetrieveAPIView):
     """
     Admin only.
-    GET /api/vehicles/<pk>/insurance/   → get insurance for a specific vehicle
+    GET /api/vehicles/<pk>/insurance/
     """
     queryset           = Vehicle.objects.all()
     serializer_class   = VehicleSerializer
@@ -110,8 +110,8 @@ class VehicleInsuranceDetail(generics.RetrieveAPIView):
 class MyVehicleList(APIView):
     """
     Mobile app.
-    GET  /api/mobile/vehicles/        → list own vehicles
-    POST /api/mobile/vehicles/        → add a vehicle (owner auto-set to request.user)
+    GET  /api/mobile/vehicles/   → list own vehicles
+    POST /api/mobile/vehicles/   → add a vehicle (owner auto-set to request.user)
     """
     permission_classes = [IsOwnerOrAdmin]
     parser_classes     = [MultiPartParser, FormParser]
@@ -121,7 +121,6 @@ class MyVehicleList(APIView):
         return Response(VehicleSerializer(vehicles, many=True).data)
 
     def post(self, request):
-        # Force owner to the authenticated user — mobile users can't set owner themselves
         data = request.data.copy()
         data['owner'] = request.user.id
         serializer = VehicleSerializer(data=data)
@@ -141,7 +140,6 @@ class MyVehicleDetail(APIView):
     parser_classes     = [MultiPartParser, FormParser]
 
     def _get_own_vehicle(self, request, pk):
-        """Fetch vehicle and enforce object-level permission."""
         vehicle = get_object_or_404(Vehicle, pk=pk)
         self.check_object_permissions(request, vehicle)
         return vehicle
@@ -168,9 +166,9 @@ class MyVehicleInsurance(APIView):
     """
     Mobile app.
     GET /api/mobile/vehicles/<pk>/insurance/
-    A user can only view insurance for their own vehicle.
     """
     permission_classes = [IsOwnerOrAdmin]
+    parser_classes     = [MultiPartParser, FormParser]
 
     def get(self, request, pk):
         vehicle = get_object_or_404(Vehicle, pk=pk)
